@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	  <LangVersion>preview</LangVersion>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<None Include="working\templates\extensions\{day}\{Challenge}.cs" />
+		<None Include="working\templates\extensions\{day}\{Challenge}Tests.cs" />
+		<Content Include="working\templates\extensions\.template.config\template.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Remove="working\templates\extensions\**" />
+		<EmbeddedResource Remove="working\templates\extensions\{day}\**" />
+	</ItemGroup>
+
+</Project>

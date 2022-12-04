@@ -1,0 +1,38 @@
+﻿{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Me",
+  "classifications": [ "Common", "Code" ],
+  "identity": "Template.AdventOfCode",
+  "name": "Template: Advent of Code",
+  "shortName": "aoc",
+  "tags": {
+    "language": "C#",
+    "type": "item"
+  },
+  "symbols": {
+    "day": {
+      "type": "parameter",
+      "replaces": "{day}",
+      "defaultValue": "Day0",
+      "FileRename": "{day}"
+    },
+    "challenge": {
+      "type": "parameter",
+      "replaces": "{challenge}",
+      "defaultValue": "challenge",
+      "FileRename": "{challenge}"
+    },
+    "Challenge": {
+      "type": "derived",
+      "valueSource": "challenge",
+      "valueTransform": "first_uc",
+      "replaces": "{Challenge}",
+      "fileRename": "{Challenge}"
+    }
+  },
+  "forms": {
+    "first_uc": {
+      "identifier": "firstUpperCase"
+    }
+  }
+}
