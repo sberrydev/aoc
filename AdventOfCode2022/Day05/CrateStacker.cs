@@ -1,104 +1,103 @@
-﻿using System.Numerics;
+﻿// using System.Collections.Generic;
+
 using System.Text.RegularExpressions;
 
-namespace AdventOfCode2022.Day05
+namespace AdventOfCode2022.Day05;
+
+internal class CrateStacker
 {
-    internal class CrateStacker
+    private readonly IEnumerable<string> _lines;
+
+    public CrateStacker(IEnumerable<string> lines)
     {
-        private readonly IEnumerable<string> _lines;
+        _lines = lines;
+    }
 
-        public CrateStacker(IEnumerable<string> lines)
+    public string PuzzleOne()
+    {
+        var crates = GetCrates();
+        var movedCrates = MoveCrates(crates, MoveCratesSingularly);
+        return CratesToString(movedCrates);
+    }
+
+    public string PuzzleTwo()
+    {
+        var crates = GetCrates();
+        var movedCrates = MoveCrates(crates, MoveCratesTogether);
+        return CratesToString(movedCrates);
+    }
+
+    private List<List<char>> GetCrates()
+    {
+        var crateRows = _lines.TakeWhile(line => line.Contains('[')).ToList();
+        var numberOfColumns = int.Parse(_lines.ElementAt(crateRows.Count).Trim().Last().ToString());
+
+        List<List<char>> allCrates = new();
+
+        for (var i = 0; i < numberOfColumns; i++)
         {
-            _lines = lines;
+            allCrates.Add(new List<char>());
         }
 
-        public string PuzzleOne()
+        const int sizeOfColumn = 4;
+        for (var row = 0; row < crateRows.Count; row++)
         {
-            var crates = GetCrates();
-            var movedCrates = MoveCrates(crates);
-            return CratesToString(movedCrates);
-        }
-
-        public string PuzzleTwo()
-        {
-            var crates = GetCrates();
-            var movedCrates = MoveCratesTwo(crates);
-            return CratesToString(movedCrates);
-        }
-
-        private List<List<char>> GetCrates()
-        {
-            var crates = _lines.TakeWhile(line => line.Contains('[')).ToList();
-            var numberOfItems = int.Parse(_lines.ElementAt(crates.Count).Trim().Last().ToString());
-
-            List<List<char>> allCrates = new();
-
-            for (var i = 0; i < numberOfItems; i++)
+            for (var column = 0; column < numberOfColumns * sizeOfColumn; column += sizeOfColumn)
             {
-                allCrates.Add(new List<char>());
-            }
-
-            for (var lineNumber = 0; lineNumber < crates.Count; lineNumber++)
-            {
-                for (var index = 0; index < numberOfItems * 4; index += 4)
+                if (crateRows.ElementAt(row)[column] == '[')
                 {
-                    if (crates.ElementAt(lineNumber)[index] == '[')
-                    {
-                        allCrates[index / 4].Add(crates.ElementAt(lineNumber)[index + 1]);
-                    }
+                    allCrates[column / sizeOfColumn].Add(crateRows.ElementAt(row)[column + 1]);
                 }
             }
-
-            return allCrates;
         }
 
-        //todo: stack?
-        private List<List<char>> MoveCrates(List<List<char>> crates)
+        return allCrates;
+    }
+
+    private List<List<char>> MoveCrates(List<List<char>> crates, Action<int, int, int, List<List<char>>> action)
+    {
+        const string regex = "(?<numberToMove>[0-9]+).*(?<fromStack>[0-9]+).*(?<toStack>[0-9]+)";
+
+        var instructions = _lines.SkipWhile(line => !line.StartsWith('m'));
+
+        foreach (var instruction in instructions)
         {
-            var instructions = _lines.SkipWhile(line => !line.StartsWith('m'));
+            var inst = Regex.Match(instruction, regex);
+            var numberToMove = int.Parse(inst.Groups["numberToMove"].Value);
+            var fromStack = int.Parse(inst.Groups["fromStack"].Value);
+            var toStack = int.Parse(inst.Groups["toStack"].Value);
 
-            foreach (var instruction in instructions)
-            {
-                var inst = Regex.Split(instruction.TrimStart(), @"\D+").Where(data => data != string.Empty).ToArray();
-
-                for (var repeatTimes = 0; repeatTimes < int.Parse(inst[0]); repeatTimes++)
-                {
-                    var line = int.Parse(inst[1]) - 1;
-                    var moving = crates[line][0];
-                    crates[line].RemoveAt(0);
-                    crates[int.Parse(inst[2]) - 1].Insert(0, moving);
-                }
-            }
-
-            return crates;
+            action(numberToMove, fromStack, toStack, crates);
         }
 
-        //todo: refactor into one
-        private List<List<char>> MoveCratesTwo(List<List<char>> crates)
+        return crates;
+    }
+
+    public static void MoveCratesSingularly(int numberToMove, int fromStack, int toStack, List<List<char>> crates)
+    {
+        for (var repeatTimes = 0; repeatTimes < numberToMove; repeatTimes++)
         {
-            var regex = "([0-9]+).*([0-9]+).*([0-9]+)";
-
-            var instructions = _lines.SkipWhile(line => !line.StartsWith('m'));
-
-            foreach (var instruction in instructions)
-            {
-                var inst = Regex.Split(instruction, regex);
-                for (var repeatTimes = int.Parse(inst[1]) - 1; repeatTimes >= 0; repeatTimes--)
-                {
-                    var line = int.Parse(inst[2]) - 1;
-                    var moving = crates[line][repeatTimes];
-                    crates[line].RemoveAt(repeatTimes);
-                    crates[int.Parse(inst[3]) - 1].Insert(0, moving);
-                }
-            }
-
-            return crates;
+            var line = fromStack - 1;
+            var moving = crates[line][0];
+            crates[line].RemoveAt(0);
+            crates[toStack - 1].Insert(0, moving);
         }
+    }
 
-        private string CratesToString(List<List<char>> movedCrates)
+    public static void MoveCratesTogether(int numberToMove, int fromStack, int toStack, List<List<char>> crates)
+    {
+        for (var repeatTimes = numberToMove - 1; repeatTimes >= 0; repeatTimes--)
         {
-            return movedCrates.Where(movedCrate => movedCrate.Any())
-                .Aggregate("", (current, movedCrate) => current + movedCrate.First());
+            var line = fromStack - 1;
+            var moving = crates[line][repeatTimes];
+            crates[line].RemoveAt(repeatTimes);
+            crates[toStack - 1].Insert(0, moving);
         }
+    }
+
+    private string CratesToString(List<List<char>> movedCrates)
+    {
+        return movedCrates.Where(movedCrate => movedCrate.Any())
+            .Aggregate("", (current, movedCrate) => current + movedCrate.First());
     }
 }
