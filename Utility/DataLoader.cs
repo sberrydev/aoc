@@ -23,6 +23,11 @@ public static class DataLoader
         return LoadLines("ExampleInput.txt", day);
     }
 
+    public static IEnumerable<string> LoadExample(int number, string day = "Data")
+    {
+        return LoadLines($"ExampleInput{number}.txt", day);
+    }
+
     public static string LoadExampleString(string day = "Data")
     {
         return LoadAllLines("test.txt", day);
