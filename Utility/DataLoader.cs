@@ -30,7 +30,7 @@ public static class DataLoader
 
     public static string LoadExampleString(string day = "Data")
     {
-        return LoadAllLines("test.txt", day);
+        return LoadAllLines("ExampleInput.txt", day);
     }
 
     public static IEnumerable<string> LoadChallenge(string day = "Data")
@@ -40,6 +40,6 @@ public static class DataLoader
 
     public static string LoadChallengeString(string day = "Data")
     {
-        return LoadAllLines("challengeInput.txt", day);
+        return LoadAllLines("ActualInput.txt", day);
     }
 }

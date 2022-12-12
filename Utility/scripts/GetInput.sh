@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env bash
+﻿#!/bin/env bash
 
 pad_number=$(printf "%02d" $1)
 number=$(printf "%1d" $1)
